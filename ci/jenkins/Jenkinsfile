@@ -46,11 +46,10 @@ pipeline {
     }
 
     parameters {
-        string(name: 'MY_GIT_URL', defaultValue: 'https://github.com/cyan21/swampup2021', description: 'DO NOT ADD .git at the end')
-        string(name: 'MY_GIT_BRANCH', defaultValue: 'java', description: '')
-        string(name: 'SRC_PATH', defaultValue: 'SU-301-Practical-Guide-to-Leveraging-JFrog-Pipelines-for-Jenkins-Users', description: '')
+        string(name: 'MY_GIT_URL', defaultValue: 'https://github.com/cyan21/java-demo', description: 'DO NOT ADD .git at the end')
+        string(name: 'MY_GIT_BRANCH', defaultValue: 'main', description: '')
 
-        string(name: 'NEW_VERSION', defaultValue: '2.4.1', description: '')
+        string(name: 'NEW_VERSION', defaultValue: '2.5.0', description: '')
         string(name: 'NEW_MSG', defaultValue: 'Welcome to Swampup 2021', description: '')
 
         string(name: 'JPD_URL', defaultValue: 'yann-swampup.dev.aws.devopsacc.team', description: 'DO NOT ADD PROTOCOL')
@@ -61,7 +60,7 @@ pipeline {
         string(name: 'DOCKER_REPO', defaultValue: 'urs-docker', description: '')
         string(name: 'DOCKER_PROMOTE', defaultValue: 'urs-docker-release-local', description: '')
 
-        booleanParam(name: 'MVN_BUILD', defaultValue: false, description: '')
+        booleanParam(name: 'MVN_BUILD', defaultValue: true, description: '')
         booleanParam(name: 'DOCKER_BUILD', defaultValue: true, description: '')
     }
     
@@ -78,64 +77,63 @@ pipeline {
                      
                     git branch: params.MY_GIT_BRANCH , url: params.MY_GIT_URL
 
-                    dir (params.SRC_PATH) {
-                    
+                    dir ("src") {
+
                         sh """
                             ls -l 
-                            sed -i "s|<version>1.4.1</version>|<version>${params.NEW_VERSION}</version>|" "src/java/pom.xml"
-                            sed -i "s|<version>1.4.1</version>|<version>${params.NEW_VERSION}</version>|" "src/java/application/pom.xml"
-                            sed -i "s|<version>1.4.1</version>|<version>${params.NEW_VERSION}</version>|" "src/java/library/pom.xml"
+                            sed -i "s|<version>2.0.0</version>|<version>${params.NEW_VERSION}</version>|" "pom.xml"
+                            sed -i "s|<version>2.0.0</version>|<version>${params.NEW_VERSION}</version>|" "application/pom.xml"
+                            sed -i "s|<version>2.0.0</version>|<version>${params.NEW_VERSION}</version>|" "library/pom.xml"
                             
-                            cat src/java/pom.xml
+                            cat pom.xml
     
-                            echo "service.message=${params.NEW_MSG}" > src/java/application/src/main/resources/application.properties 
-                            cat src/java/application/src/main/resources/application.properties 
+                            echo "service.message=${params.NEW_MSG}" > application/src/main/resources/application.properties 
+                            cat application/src/main/resources/application.properties 
                         """
+                        
+                        rtServer (
+                            id: env.ART_ID,
+                            url: "https://${params.JPD_URL}/artifactory",
+                            credentialsId: env.ARTY_CREDS_ID
+                        )
+        
+                        rtMavenDeployer (
+                            id: "MAVEN_DEPLOYER",
+                            serverId: env.ART_ID,
+                            releaseRepo: env.MVN_REPO,
+                            snapshotRepo: env.MVN_REPO
+                        )
+        
+                        rtMavenResolver (
+                            id: "MAVEN_RESOLVER",
+                            serverId: env.ART_ID,
+                            releaseRepo: env.MVN_REPO,
+                            snapshotRepo: env.MVN_REPO
+                        )
+                        
+                        rtBuildInfo (
+                            captureEnv: true,
+                            excludeEnvPatterns: ['*MY_BUILD_NAME*', 'DOCKER_BUILD_NAME'],
+         
+                            buildName: env.MY_BUILD_NAME,
+                            buildNumber: env.BUILD_NUMBER
+                        )
+                                            
+                        rtMavenRun (
+                            pom: "pom.xml",
+                            goals: 'clean package',
+                            deployerId: "MAVEN_DEPLOYER",
+                            resolverId: "MAVEN_RESOLVER",
+                            buildName: env.MY_BUILD_NAME,
+                            buildNumber: env.BUILD_NUMBER
+                        )
+                      
+                        rtPublishBuildInfo (
+                            serverId: env.ART_ID,
+                            buildName: env.MY_BUILD_NAME,
+                            buildNumber: env.BUILD_NUMBER
+                        )
                     }
-                    
-                    rtServer (
-                        id: env.ART_ID,
-                        url: "https://${params.JPD_URL}/artifactory",
-                        credentialsId: env.ARTY_CREDS_ID
-                    )
-    
-                    rtMavenDeployer (
-                        id: "MAVEN_DEPLOYER",
-                        serverId: env.ART_ID,
-                        releaseRepo: env.MVN_REPO,
-                        snapshotRepo: env.MVN_REPO
-                    )
-    
-                    rtMavenResolver (
-                        id: "MAVEN_RESOLVER",
-                        serverId: env.ART_ID,
-                        releaseRepo: env.MVN_REPO,
-                        snapshotRepo: env.MVN_REPO
-                    )
-                    
-                    rtBuildInfo (
-                        captureEnv: true,
-                        excludeEnvPatterns: ['*MY_BUILD_NAME*', 'DOCKER_BUILD_NAME'],
-     
-                        buildName: env.MY_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER
-                    )
-                                        
-                    rtMavenRun (
-                        pom: "${params.SRC_PATH}/src/java/pom.xml",
-                        goals: 'clean package',
-                        deployerId: "MAVEN_DEPLOYER",
-                        resolverId: "MAVEN_RESOLVER",
-                        buildName: env.MY_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER
-                    )
-                  
-                    rtPublishBuildInfo (
-                        serverId: env.ART_ID,
-                        buildName: env.MY_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER
-                    )
-
                 } // end container
             } // end step
         }   // end stage
@@ -222,7 +220,7 @@ pipeline {
                         apk add curl openjdk11
                         git_path=`echo ${params.MY_GIT_URL} | cut -d/ -f4,5`
                         echo \${git_path}
-                        curl -O https://raw.githubusercontent.com/\${git_path}/${params.MY_GIT_BRANCH}/${params.SRC_PATH}/src/java/Dockerfile
+                        curl -O https://raw.githubusercontent.com/\${git_path}/${params.MY_GIT_BRANCH}/src/Dockerfile
                         docker login -u ${ARTY_CREDS_USR} -p ${ARTY_CREDS_PSW} ${params.JPD_URL}
                         ls -l 
                         docker build -t ${params.JPD_URL}/${params.DOCKER_REPO}/jenkins-javapp:${params.NEW_VERSION} .
