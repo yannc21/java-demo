@@ -60,8 +60,8 @@ pipeline {
         string(name: 'DOCKER_REPO', defaultValue: 'urs-docker', description: '')
         string(name: 'DOCKER_PROMOTE', defaultValue: 'urs-docker-release-local', description: '')
 
-        booleanParam(name: 'MVN_BUILD', defaultValue: true, description: '')
-        booleanParam(name: 'DOCKER_BUILD', defaultValue: true, description: '')
+        booleanParam(name: 'MVN_BUILD', defaultValue: false, description: '')
+        booleanParam(name: 'DOCKER_BUILD', defaultValue: false, description: '')
     }
     
     stages {
