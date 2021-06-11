@@ -246,6 +246,11 @@ pipeline {
         } // end stage
 
         stage ('Xray scan for Docker Build') {
+            when {
+                expression {
+                    params.DOCKER_BUILD
+                }
+            }
             steps {
                 xrayScan (
                     serverId: env.ART_ID,
@@ -258,6 +263,11 @@ pipeline {
         
 
         stage ('Build promotion for Docker Build') {
+            when {
+                expression {
+                    params.DOCKER_BUILD
+                }
+            }
             steps {
                 rtPromote (
                     // Mandatory parameter
