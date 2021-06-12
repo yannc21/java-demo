@@ -62,6 +62,8 @@ pipeline {
 
         booleanParam(name: 'MVN_BUILD', defaultValue: false, description: '')
         booleanParam(name: 'DOCKER_BUILD', defaultValue: false, description: '')
+        booleanParam(name: 'INDEX_BUILD', defaultValue: false, description: 'Shtrue ONLY for the 1st run')
+
     }
     
     stages {
@@ -133,6 +135,19 @@ pipeline {
                             buildName: env.MY_BUILD_NAME,
                             buildNumber: env.BUILD_NUMBER
                         )
+
+                        sh """
+                            if [ ${params.INDEX_BUILD} == "true" ]; then
+                                curl \
+                                    -XPOST \
+                                    -u ${ARTY_CREDS_USR}:${ARTY_CREDS_PSW} \
+                                    -H "Content-Type: application/json" \
+                                    -d '{"names":["'${env.MY_BUILD_NAME}'"]}' \
+                                ${params.JPD_URL}/xray/api/v1/binMgr/builds
+                            else
+                                echo "No indexing"
+                            fi 
+                        """
                     }
                 } // end container
             } // end step
