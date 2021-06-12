@@ -115,7 +115,7 @@ pipeline {
                         
                         rtBuildInfo (
                             captureEnv: true,
-                            excludeEnvPatterns: ['*MY_BUILD_NAME*', 'DOCKER_BUILD_NAME'],
+                            excludeEnvPatterns: ['DOCKER_BUILD_NAME'],
          
                             buildName: env.MY_BUILD_NAME,
                             buildNumber: env.BUILD_NUMBER
@@ -137,6 +137,7 @@ pipeline {
                         )
 
                         sh """
+                            echo ${env.MY_BUILD_NAME}
                             if [ ${params.INDEX_BUILD} == "true" ]; then
                                 curl \
                                     -XPOST \
