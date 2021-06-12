@@ -136,7 +136,7 @@ pipeline {
                             buildNumber: env.BUILD_NUMBER
                         )
 
-                        sh """
+                        sh """#!/bin/sh
                             echo ${env.MY_BUILD_NAME}
                             if [ ${params.INDEX_BUILD} == "true" ]; then
                                 curl \
