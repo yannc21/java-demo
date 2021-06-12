@@ -38,8 +38,8 @@ pipeline {
         ARTY_CREDS_ID='jenkins_rt'
         
         ART_ID="artifactory-eu"
-        MY_BUILD_NAME = 'jenkins-java'
-        DOCKER_BUILD_NAME = 'jenkins-java-docker'
+        MY_BUILD_NAME = 'jnks-java'
+        DOCKER_BUILD_NAME = 'jnks-java-docker'
         
         JAVA_HOME = '/usr/lib/jvm/java-1.8-openjdk/'
         MAVEN_HOME = '/usr/share/maven'
@@ -136,7 +136,7 @@ pipeline {
                             buildNumber: env.BUILD_NUMBER
                         )
 
-                        sh """#!/bin/sh
+                        sh """
                             echo ${env.MY_BUILD_NAME}
                             if [ ${params.INDEX_BUILD} == "true" ]; then
                                 curl \
