@@ -60,13 +60,12 @@ pipeline {
         string(name: 'DOCKER_REPO', defaultValue: 'urs-docker', description: '')
         string(name: 'DOCKER_PROMOTE', defaultValue: 'urs-docker-release-local', description: '')
 
-        string(name: 'ADM_USER', defaultValue: '', description: 'Only used if INDEX_BUILD is ticked')
-        string(name: 'ADM_PASS', defaultValue: '', description: 'Only used if INDEX_BUILD is ticked')
-
         booleanParam(name: 'MVN_BUILD', defaultValue: false, description: '')
         booleanParam(name: 'DOCKER_BUILD', defaultValue: false, description: '')
         booleanParam(name: 'INDEX_BUILD', defaultValue: false, description: 'Should be used ONLY for the 1st run for XRAY to index a build ')
 
+        string(name: 'ADM_USER', defaultValue: '', description: 'Only used if INDEX_BUILD is ticked')
+        string(name: 'ADM_PASS', defaultValue: '', description: 'Only used if INDEX_BUILD is ticked')
     }
     
     stages {
@@ -170,6 +169,20 @@ pipeline {
                     buildNumber: env.BUILD_NUMBER,
                     failBuild: false
                 )   
+
+                sh """
+                    // ugly workaround to see the scan result in the UI
+                    if [ ${params.INDEX_BUILD} == "true" ]; then
+                        curl \
+                            -XPOST \
+                            -u ${ADM_USER}:${ADM_PASS} \
+                            -H "Content-Type: application/json" \
+                            -d '{"buildName": "'${env.MY_BUILD_NAME}'", "buildNumber": "'${env.BUILD_NUMBER}'" }' \
+                        https://${params.JPD_URL}/xray/api/v1/scanBuild
+                    else
+                        echo "No indexing"
+                    fi
+                """
             }
         }
         
@@ -190,7 +203,8 @@ pipeline {
                     comment: 'Xray scan passed',
                     status: 'VULN_SCAN_OK',
                     includeDependencies: true,
-                    copy: false
+                    copy: false,
+                    failFast: false
                 )               
             }
         }
@@ -260,6 +274,18 @@ pipeline {
                         buildNumber: env.BUILD_NUMBER
                     )
 
+                    sh """
+                        if [ ${params.INDEX_BUILD} == "true" ]; then
+                            curl \
+                                -XPOST \
+                                -u ${ADM_USER}:${ADM_PASS} \
+                                -H "Content-Type: application/json" \
+                                -d '{"names":["'${env.DOCKER_BUILD_NAME}'"]}' \
+                            https://${params.JPD_URL}/xray/api/v1/binMgr/builds
+                        else
+                            echo "No indexing"
+                        fi 
+                    """
                 }
             } // end steps
         } // end stage
@@ -276,7 +302,21 @@ pipeline {
                     buildName: env.DOCKER_BUILD_NAME,
                     buildNumber: env.BUILD_NUMBER,
                     failBuild: false
-                )   
+                ) 
+
+                sh """
+                    // ugly workaround to see the scan result in the UI
+                    if [ ${params.INDEX_BUILD} == "true" ]; then
+                        curl \
+                            -XPOST \
+                            -u ${ADM_USER}:${ADM_PASS} \
+                            -H "Content-Type: application/json" \
+                            -d '{"buildName": "'${env.DOCKER_BUILD_NAME}'", "buildNumber": "'${env.BUILD_NUMBER}'" }' \
+                        https://${params.JPD_URL}/xray/api/v1/scanBuild
+                    else
+                        echo "No indexing"
+                    fi 
+                """     
             }
         }
         
@@ -298,7 +338,8 @@ pipeline {
                     comment: 'Xray scan passed',
                     status: 'VULN_SCAN_OK',
                     includeDependencies: false,
-                    copy: false
+                    copy: false,
+                    failFast: false
                 )               
             }
         }
