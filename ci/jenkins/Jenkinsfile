@@ -60,9 +60,12 @@ pipeline {
         string(name: 'DOCKER_REPO', defaultValue: 'urs-docker', description: '')
         string(name: 'DOCKER_PROMOTE', defaultValue: 'urs-docker-release-local', description: '')
 
+        string(name: 'ADM_USER', defaultValue: '', description: 'Only used if INDEX_BUILD is ticked')
+        string(name: 'ADM_PASS', defaultValue: '', description: 'Only used if INDEX_BUILD is ticked')
+
         booleanParam(name: 'MVN_BUILD', defaultValue: false, description: '')
         booleanParam(name: 'DOCKER_BUILD', defaultValue: false, description: '')
-        booleanParam(name: 'INDEX_BUILD', defaultValue: false, description: 'Shtrue ONLY for the 1st run')
+        booleanParam(name: 'INDEX_BUILD', defaultValue: false, description: 'Should be used ONLY for the 1st run for XRAY to index a build ')
 
     }
     
@@ -141,7 +144,7 @@ pipeline {
                             if [ ${params.INDEX_BUILD} == "true" ]; then
                                 curl \
                                     -XPOST \
-                                    -u ${ARTY_CREDS_USR}:${ARTY_CREDS_PSW} \
+                                    -u ${ADM_USER}:${ADM_PASS} \
                                     -H "Content-Type: application/json" \
                                     -d '{"names":["'${env.MY_BUILD_NAME}'"]}' \
                                 https://${params.JPD_URL}/xray/api/v1/binMgr/builds
