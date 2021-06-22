@@ -120,7 +120,9 @@ pipeline {
                             excludeEnvPatterns: ['DOCKER_BUILD_NAME'],
          
                             buildName: env.MY_BUILD_NAME,
-                            buildNumber: env.BUILD_NUMBER
+                            buildNumber: env.BUILD_NUMBER,
+                            
+                            maxBuilds: 1
                         )
                                             
                         rtMavenRun (
