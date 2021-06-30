@@ -66,6 +66,12 @@ pipeline {
 
         string(name: 'ADM_USER', defaultValue: '', description: 'Only used if INDEX_BUILD is ticked')
         string(name: 'ADM_PASS', defaultValue: '', description: 'Only used if INDEX_BUILD is ticked')
+
+        booleanParam(name: 'JPIPE_TRIGGER', defaultValue: false, description: '')
+        string(name: 'JPIPE_URL', defaultValue: 'https://pipelines-api-yann-swampup.dev.aws.devopsacc.team/v1/projectIntegrations/4/hook', description: '')
+        string(name: 'JPIPE_PASS', defaultValue: '***', description: '')
+
+        string(name: 'MY_BUILD_NUMBER', defaultValue: '0', description: 'Only used if JPIPE_TRIGGER is ticked. If set to 0 will take the current run ID')
     }
     
     stages {
@@ -174,7 +180,7 @@ pipeline {
                 )   
 
                 sh """
-                    # ugly workaround to see the scan result in the UI
+                    # workaround to see the scan result in the UI
                     if [ ${params.INDEX_BUILD} == "true" ]; then
                         curl \
                             -XPOST \
@@ -308,7 +314,7 @@ pipeline {
                 ) 
 
                 sh """
-                    # ugly workaround to see the scan result in the UI
+                    # workaround to see the scan result in the UI
                     if [ ${params.INDEX_BUILD} == "true" ]; then
                         curl \
                             -XPOST \
@@ -344,6 +350,31 @@ pipeline {
                     copy: false,
                     failFast: false
                 )               
+            }
+
+        }
+
+        stage ('Trigger JFrog Pipelines') {
+            when {
+                expression {
+                    params.JPIPE_TRIGGER
+                }
+            }
+            steps {
+                
+                sh """#!/bin/sh
+                        bNumber=${params.MY_BUILD_NUMBER} 
+			echo $bNumber
+			if [ $bNumber == "0" ]; then bNumber=${env.BUILD_NUMBER}; fi
+			echo $bNumber
+        
+                        curl \
+                            -XPOST \
+                            -H "authorization: ${params.JPIPE_PASS}" \
+                            -H "Content-Type: application/json" \
+                            -d '{"DockerBuildName": "'${env.DOCKER_BUILD_NAME}'", "DockerBuildNumber": "'${params.MY_BUILD_NUMBER}'" }' \
+                       "${params.JPIPE_URL}"
+                """
             }
         }
 
