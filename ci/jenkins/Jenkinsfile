@@ -368,15 +368,14 @@ pipeline {
                 
                 sh """#!/bin/sh
                         bNumber=${params.MY_BUILD_NUMBER} 
-#			echo \$bNumber
-			if [ \$bNumber = "0" ]; then bNumber=${env.BUILD_NUMBER}; fi
-			echo \$bNumber
+                        if [ \$bNumber = "0" ]; then bNumber=${env.BUILD_NUMBER}; fi
+                        echo \$bNumber
         
                         curl \
                             -XPOST \
                             -H "authorization: ${params.JPIPE_PASS}" \
                             -H "Content-Type: application/json" \
-                            -d '{"DockerBuildName": "'${env.DOCKER_BUILD_NAME}'", "DockerBuildNumber": "'${params.MY_BUILD_NUMBER}'" }' \
+                            -d '{"DockerBuildName": "'${env.DOCKER_BUILD_NAME}'", "buildNumber": "'\${bNumber}'" }' \
                        "${params.JPIPE_URL}"
                 """
             }
