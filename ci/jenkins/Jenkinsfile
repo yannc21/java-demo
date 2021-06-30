@@ -368,9 +368,9 @@ pipeline {
                 
                 sh """#!/bin/sh
                         bNumber=${params.MY_BUILD_NUMBER} 
-			echo $bNumber
-			if [ $bNumber == "0" ]; then bNumber=${env.BUILD_NUMBER}; fi
-			echo $bNumber
+#			echo \$bNumber
+			if [ \$bNumber = "0" ]; then bNumber=${env.BUILD_NUMBER}; fi
+			echo \$bNumber
         
                         curl \
                             -XPOST \
