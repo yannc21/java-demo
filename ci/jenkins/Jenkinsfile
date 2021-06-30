@@ -62,7 +62,11 @@ pipeline {
 
         booleanParam(name: 'MVN_BUILD', defaultValue: false, description: '')
         booleanParam(name: 'DOCKER_BUILD', defaultValue: false, description: '')
+
+        booleanParam(name: 'FAIL_BUILD', defaultValue: false, description: 'based on Xray scanning result')
+
         booleanParam(name: 'INDEX_BUILD', defaultValue: false, description: 'Should be used ONLY for the 1st run for XRAY to index a build ')
+
 
         string(name: 'ADM_USER', defaultValue: '', description: 'Only used if INDEX_BUILD is ticked')
         string(name: 'ADM_PASS', defaultValue: '', description: 'Only used if INDEX_BUILD is ticked')
@@ -176,7 +180,7 @@ pipeline {
                     serverId: env.ART_ID,
                     buildName: env.MY_BUILD_NAME,
                     buildNumber: env.BUILD_NUMBER,
-                    failBuild: false
+                    failBuild: params.FAIL_BUILD 
                 )   
 
                 sh """
@@ -310,7 +314,7 @@ pipeline {
                     serverId: env.ART_ID,
                     buildName: env.DOCKER_BUILD_NAME,
                     buildNumber: env.BUILD_NUMBER,
-                    failBuild: false
+                    failBuild: params.FAIL_BUILD 
                 ) 
 
                 sh """
