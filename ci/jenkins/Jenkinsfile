@@ -49,7 +49,8 @@ pipeline {
         string(name: 'MY_GIT_URL', defaultValue: 'https://github.com/cyan21/java-demo', description: 'DO NOT ADD .git at the end')
         string(name: 'MY_GIT_BRANCH', defaultValue: 'main', description: '')
 
-        string(name: 'NEW_VERSION', defaultValue: '2.5.0', description: '')
+        string(name: 'APP_NAME', defaultValue: 'lion', description: 'will be added as metadata on built artifacts as app.name')
+        string(name: 'NEW_VERSION', defaultValue: '2.5.0', description: 'will be added as metadata on built artifacts as app.name')
         string(name: 'NEW_MSG', defaultValue: 'Welcome to Swampup 2021', description: '')
 
         string(name: 'JPD_URL', defaultValue: 'yann-swampup.dev.aws.devopsacc.team', description: 'DO NOT ADD PROTOCOL')
@@ -114,6 +115,7 @@ pipeline {
                         rtMavenDeployer (
                             id: "MAVEN_DEPLOYER",
                             serverId: env.ART_ID,
+                            properties: "app.name=${params.APP_NAME};app.version=${params.NEW_VERSION}",
                             releaseRepo: env.MVN_REPO,
                             snapshotRepo: env.MVN_REPO
                         )
@@ -131,9 +133,9 @@ pipeline {
          
                             buildName: env.MY_BUILD_NAME,
                             buildNumber: env.BUILD_NUMBER,
-    			    maxBuilds: 1,
-                            doNotDiscardBuilds: ['4'],
-    			    deleteBuildArtifacts: true
+    			            maxBuilds: 1,
+                            // doNotDiscardBuilds: ['4'],
+            			    // deleteBuildArtifacts: true
                         )
                                             
                         rtMavenRun (
@@ -276,7 +278,7 @@ pipeline {
                         serverId: env.ART_ID,
                         image: "${params.JPD_URL}/${params.DOCKER_REPO}/jenkins-javapp:${params.NEW_VERSION}",
                         targetRepo: params.DOCKER_REPO,
-                        properties: 'project-name=uranus;status=stable',
+                        properties: "app.name=${params.APP_NAME};app.version=${params.NEW_VERSION}",
                         buildName: env.DOCKER_BUILD_NAME,
                         buildNumber: env.BUILD_NUMBER
                     )
@@ -375,7 +377,7 @@ pipeline {
                             -XPOST \
                             -H "authorization: ${params.JPIPE_PASS}" \
                             -H "Content-Type: application/json" \
-                            -d '{"DockerBuildName": "'${env.DOCKER_BUILD_NAME}'", "buildNumber": "'\${bNumber}'" }' \
+                            -d '{"DockerBuildName": "'${env.DOCKER_BUILD_NAME}'", "buildNumber": "'\${bNumber}'", "appName": "'${params.APP_NAME}'", "appVersion":"'${params.NEW_VERSION}'"}' \
                        "${params.JPIPE_URL}"
                 """
             }
