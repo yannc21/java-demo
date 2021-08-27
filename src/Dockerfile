@@ -1,4 +1,7 @@
-FROM swampup301.jfrog.io/urs-docker/groovy:jre16
+ARG REGISTRY=yann-swampup.dev.aws.devopsacc.team
+ARG DOCKER_REPO=urs-docker
+
+FROM $REGISTRY/$DOCKER_REPO/groovy:jre16
 
 RUN mkdir -p /home/groovy/webapp/
 COPY multi-module-application.jar /home/groovy/webapp/multi-module-application.jar

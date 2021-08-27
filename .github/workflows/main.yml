@@ -1,0 +1,137 @@
+name: java-webapp-gha
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ gha ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
+  APP_VERSION: 2.0.0
+  MVN_REPO: urs-mvn
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build_webapp:
+    runs-on: ubuntu-latest
+    env:
+      JFROG_BUILD_STATUS: PASS
+      JAVA_VERSION: 16.0.2+7
+      JAVA_DIST: zulu
+      MVN_VERSION: 3.8.2
+      # required by JFrog CLI
+      M2_HOME: /opt/hostedtoolcache/maven/3.8.2/x64
+      MVN_REPO: urs-mvn
+      PROMOTE_REPO: urs-mvn-rc-local
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v1.2.0
+#        with:
+#          version: 2.1.1
+    
+      - name: Setup Java JDK ${{ env.JAVA_DIST }} ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v2.3.0
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DIST }}
+        
+      - name: Setup Maven ${{ env.MVN_VERSION }}
+        uses: stCarolas/setup-maven@v4.1
+        with:
+          maven-version: ${{ env.MVN_VERSION }}
+    
+      - name: Ping Artifactory
+        run: |
+            jfrog --version
+            jfrog config show
+            jfrog rt ping
+            env
+            
+      - name: Configure JFrog CLI with Maven client
+        run: | 
+          jfrog rt mvnc \
+                  --server-id-resolve=yann-swampup \
+                  --repo-resolve-releases=${{ env.MVN_REPO }}	\
+                  --repo-resolve-snapshots=${{ env.MVN_REPO }}	\
+                  --server-id-deploy=yann-swampup \
+                  --repo-deploy-releases=${{ env.MVN_REPO }} \
+                  --repo-deploy-snapshots=${{ env.MVN_REPO }}
+
+      - name: Build webapp
+        run: jfrog rt mvn -f src/ clean package
+#        run: jfrog rt mvn -f src/ clean package -Dartifactory.publish.artifacts=false
+        
+#      - name: Audit build 
+#        run: cd src && jfrog xr am
+
+      - name: Publish Build Info
+        run: |
+          # Collect environment variables for the build
+          jfrog rt bce 
+          # Collect VCS details from git and add them to the build
+          jfrog rt bag
+          # Publish build info
+          jfrog rt bp
+          
+      - name: Scan Build 
+        run: jfrog rt bs --fail=false
+
+      - name: Promote Build 
+        run: jfrog rt bpr   --status "XRAY_SCAN_OK" --comment "promoted to the next level" ${{ env.PROMOTE_REPO }}
+  
+  build_docker:
+    needs: build_webapp
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_REG: yann-swampup.dev.aws.devopsacc.team
+      DOCKER_REPO: urs-docker
+      DOCKER_USER: ci_read
+      PROMOTE_REPO: urs-docker-release-local
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v1.2.0  
+
+      - name: Download webapp
+        run: |
+          jfrog rt download \
+            --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER  \
+            --exclusions "*.pom;*library*" \
+            --flat=true \
+            --build-name=docker-$JFROG_CLI_BUILD_NAME --build-number=$JFROG_CLI_BUILD_NUMBER \
+            ${{ env.MVN_REPO }} src/multi-module-application.jar
+
+      - name: Docker Login
+        uses: docker/login-action@v1.10.0
+        with:
+          registry: ${{ env.DOCKER_REG }}
+          username: ${{ env.DOCKER_USER }}
+          password: ${{ secrets.RT_SECRET }}
+
+      - name: Build Docker images
+        uses: docker/build-push-action@v2.6.1
+        with:
+          context: src/
+          tags: ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-java-webapp:${{ env.APP_VERSION }}
+
+      - name: Push Docker image
+        run: jfrog rt dp ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-java-webapp:${{ env.APP_VERSION }} ${{ env.DOCKER_REPO }} --build-name=docker-$JFROG_CLI_BUILD_NAME --build-number=$JFROG_CLI_BUILD_NUMBER
+
+      - name: Publish Docker Build Info
+        run: |
+          jfrog rt bce docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
+          jfrog rt bag docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
+          jfrog rt bp docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
+
+      - name: Scan Build 
+        run: jfrog rt bs --fail=false docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
+
+      - name: Promote Build 
+        run: jfrog rt bpr  --status "XRAY_SCAN_OK" --comment "promoted to the next level" docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER ${{ env.PROMOTE_REPO }}
