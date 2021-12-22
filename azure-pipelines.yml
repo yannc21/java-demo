@@ -17,6 +17,12 @@ pool:
 jobs:
 - job: java_webapp
   steps:
+  - task: JfrogCli@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      useCustomVersion: true
+      cliVersion: '2.8'
+      command: 'jfrog --version'
   - task: CmdLine@2
     inputs:
       script: |
