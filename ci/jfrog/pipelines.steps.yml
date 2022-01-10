@@ -4,6 +4,7 @@ pipelines:
       environmentVariables:
         readOnly:
           virtualRepo: urs-mvn
+          skipScan: true
     steps:
       - name: build_backapp_mvn
         type: MvnBuild
@@ -45,7 +46,10 @@ pipelines:
           inputResources:
             - name: bi_backapp_mvn
               trigger: true
-
+        execution:
+          onStart:
+            - if [ "${skipScan}" == "true" ]; then echo Skipping scan_backapp_mvn step; exit 0; fi
+            
       - name: promote_bi_backapp_mvn_promoted
         type: PromoteBuild
         configuration:
@@ -59,6 +63,12 @@ pipelines:
               trigger: true
           inputSteps:
             - name: scan_backapp_mvn
+              status:
+                - success
+                - failure
+                - error
+                - cancelled
+                - skipped
           outputResources:
             - name: bi_backapp_mvn_promoted
             - name: pb_backapp_mvn
