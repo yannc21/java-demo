@@ -12,6 +12,7 @@ pipelines:
             JFROG_CLI_BUILD_NAME: "{{ gitBranch }}_backapp_mvn"
             JFROG_CLI_BUILD_URL: "${step_url}${res_src_code_backapp_mvn_branchName}"
             JFROG_CLI_LOG_LEVEL: DEBUG
+            M2_HOME: /usr/local/apache-maven-3.6.3/
           mvnCommand: clean package
           sourceLocation: src
           resolverSnapshotRepo: ${virtualRepo}
