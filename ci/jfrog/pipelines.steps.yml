@@ -4,7 +4,7 @@ pipelines:
       environmentVariables:
         readOnly:
           virtualRepo: urs-mvn
-          skipScan: true
+          skipScan: "true"
     steps:
       - name: build_backapp_mvn
         type: MvnBuild
