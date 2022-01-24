@@ -103,7 +103,9 @@ pipeline {
                             sed -i "s|<version>2.0.0</version>|<version>${params.NEW_VERSION}</version>|g" "library/pom.xml"
                             
                             cat pom.xml
-    
+                            cat application/pom.xml
+                            cat library/pom.xml
+                            
                             echo "service.message=${params.NEW_MSG}" > application/src/main/resources/application.properties 
                             cat application/src/main/resources/application.properties 
                         """
