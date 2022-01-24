@@ -290,7 +290,7 @@ pipeline {
                         curl -O https://raw.githubusercontent.com/\${git_path}/${params.MY_GIT_BRANCH}/src/Dockerfile
                         docker login -u ${ARTY_CREDS_USR} -p ${ARTY_CREDS_PSW} ${env.DOCKER_REGISTRY_URL}
                         ls -l 
-                        docker build -t ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION} .
+                        docker build --build-arg REGISTRY=${env.DOCKER_REGISTRY_URL} -t ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION} . 
                     """
                 
                     sh """
