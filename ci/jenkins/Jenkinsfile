@@ -45,8 +45,8 @@ pipeline {
         JAVA_HOME = '/usr/lib/jvm/java-1.8-openjdk/'
         MAVEN_HOME = '/usr/share/maven'
 
-        JFROG_LOG_LEVEL=ERROR
-        CI=true
+        JFROG_LOG_LEVEL='ERROR'
+        CI='true'
     }
 
     parameters {
