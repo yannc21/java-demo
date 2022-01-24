@@ -48,13 +48,13 @@ pipeline {
 
     parameters {
         string(name: 'MY_GIT_URL', defaultValue: 'https://github.com/cyan21/java-demo', description: 'DO NOT ADD .git at the end')
-        string(name: 'MY_GIT_BRANCH', defaultValue: 'soleng-stg', description: '')
+        string(name: 'MY_GIT_BRANCH', defaultValue: 'main', description: '')
 
         string(name: 'APP_NAME', defaultValue: 'lion', description: 'will be added as metadata on built artifacts as app.name')
         string(name: 'NEW_VERSION', defaultValue: '2.5.0', description: 'will be added as metadata on built artifacts as app.name')
         string(name: 'NEW_MSG', defaultValue: 'Welcome to Swampup 2021', description: '')
 
-        string(name: 'JPD_URL', defaultValue: '', description: 'DO NOT ADD PROTOCOL')
+        string(name: 'JPD_URL', defaultValue: 'yann-sbx.dev.gcp.devopsacc.team', description: 'DO NOT ADD PROTOCOL')
 
         string(name: 'MVN_REPO', defaultValue: 'urs-mvn', description: '')
         string(name: 'MVN_PROMOTE', defaultValue: 'urs-mvn-prod-local', description: '')
@@ -63,7 +63,7 @@ pipeline {
         string(name: 'DOCKER_PROMOTE', defaultValue: 'urs-docker-release-local', description: '')
         booleanParam(name: 'DOCKER_SUB_DOMAIN', defaultValue: false, description: 'false means Docker Repo Path')
 
-        booleanParam(name: 'MVN_BUILD', defaultValue: false, description: '')
+        booleanParam(name: 'MVN_BUILD', defaultValue: true, description: '')
         booleanParam(name: 'DOCKER_BUILD', defaultValue: false, description: '')
 
         booleanParam(name: 'FAIL_BUILD', defaultValue: false, description: 'based on Xray scanning result')
