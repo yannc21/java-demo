@@ -44,9 +44,6 @@ pipeline {
         
         JAVA_HOME = '/usr/lib/jvm/java-1.8-openjdk/'
         MAVEN_HOME = '/usr/share/maven'
-
-        JFROG_LOG_LEVEL='ERROR'
-        CI='true'
     }
 
     parameters {
@@ -147,10 +144,13 @@ pipeline {
                         sh """
                             curl -fL https://getcli.jfrog.io/v2-jf | sh
                             ./jf --version
-                            ./jf audit \
-                                --url=https://${params.JPD_URL}/xray \
+                            JFROG_CLI_LEVEL=ERROR CI=true ./jf c add  \
+                                --url=https://${params.JPD_URL} \
                                 --user=${ARTY_CREDS_USR}  \
-                                --password="${ARTY_CREDS_PSW}"
+                                --password="${ARTY_CREDS_PSW}" \
+                            yann-rt
+                            ./jf audit-mvn
+
                         """
 
                         rtMavenRun (
@@ -292,12 +292,16 @@ pipeline {
                 
                     // Audit Docker image
                     sh """
+                        
                         curl -fL https://getcli.jfrog.io/v2-jf | sh
                         ./jf --version
-                        ./jf docker scan ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION} \
-                            --url=https://${params.JPD_URL}/xray \
+                        ./jf c show
+                        JFROG_CLI_LEVEL=ERROR CI=true ./jf c add  \
+                            --url=https://${params.JPD_URL} \
                             --user=${ARTY_CREDS_USR}  \
-                            --password="${ARTY_CREDS_PSW}"
+                            --password="${ARTY_CREDS_PSW}" \
+                        yann-rt
+                        ./jf docker scan ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION}
                     """
 
                     rtDockerPush(
