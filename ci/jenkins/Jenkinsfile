@@ -98,7 +98,6 @@ pipeline {
 
                         sh """
                             mvn --version
-                            curl https://yann-sbx.dev.gcp.devopsacc.team/artifactory/api/system/ping 
 
                             ls -l 
                             sed -i "s|<version>2.0.0</version>|<version>${params.NEW_VERSION}</version>|g" "pom.xml"
@@ -144,10 +143,23 @@ pipeline {
                             // doNotDiscardBuilds: ['4'],
             			    // deleteBuildArtifacts: true
                         )
-                                            
+
+
+                        sh """
+                            // download CLI
+                            curl -fL https://getcli.jfrog.io/v2-jf | sh
+                            ./jf --version
+
+                            // audit on docker images
+                            ./jf audit \
+                                --url=https://${params.JPD_URL} \
+                                --user=${ARTY_CREDS_USR}  \
+                                --password="${ARTY_CREDS_PSW}"
+                        """
+
                         rtMavenRun (
                             pom: "pom.xml",
-                            goals: 'clean -U package -X',
+                            goals: 'clean package -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn',
                             deployerId: "MAVEN_DEPLOYER",
                             resolverId: "MAVEN_RESOLVER",
                             buildName: env.MY_BUILD_NAME,
@@ -281,6 +293,18 @@ pipeline {
                         docker build -t ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION} .
                     """
                 
+                    sh """
+                        // download CLI
+                        curl -fL https://getcli.jfrog.io/v2-jf | sh
+                        ./jf --version
+
+                        // audit on docker images
+                        ./jf docker scan ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION}\
+                            --url=https://${params.JPD_URL} \
+                            --user=${ARTY_CREDS_USR}  \
+                            --password="${ARTY_CREDS_PSW}"
+                    """
+
                     rtDockerPush(
                         serverId: env.ART_ID,
                         image: "${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION}",
