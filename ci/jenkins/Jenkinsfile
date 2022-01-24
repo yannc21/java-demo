@@ -91,16 +91,16 @@ pipeline {
             }
             steps {
                 container('maven') {
-                     
+                    
                     git branch: params.MY_GIT_BRANCH , url: params.MY_GIT_URL
 
                     dir ("src") {
 
                         sh """
                             ls -l 
-                            sed -i "s|<version>2.0.0</version>|<version>${params.NEW_VERSION}</version>|" "pom.xml"
-                            sed -i "s|<version>2.0.0</version>|<version>${params.NEW_VERSION}</version>|" "application/pom.xml"
-                            sed -i "s|<version>2.0.0</version>|<version>${params.NEW_VERSION}</version>|" "library/pom.xml"
+                            sed -i "s|<version>2.0.0</version>|<version>${params.NEW_VERSION}</version>|g" "pom.xml"
+                            sed -i "s|<version>2.0.0</version>|<version>${params.NEW_VERSION}</version>|g" "application/pom.xml"
+                            sed -i "s|<version>2.0.0</version>|<version>${params.NEW_VERSION}</version>|g" "library/pom.xml"
                             
                             cat pom.xml
     
