@@ -144,13 +144,10 @@ pipeline {
             			    // deleteBuildArtifacts: true
                         )
 
-
+                        // audit dependencies
                         sh """
-                            // download CLI
                             curl -fL https://getcli.jfrog.io/v2-jf | sh
                             ./jf --version
-
-                            // audit on docker images
                             ./jf audit \
                                 --url=https://${params.JPD_URL} \
                                 --user=${ARTY_CREDS_USR}  \
@@ -293,13 +290,11 @@ pipeline {
                         docker build --build-arg REGISTRY=${env.DOCKER_REGISTRY_URL} -t ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION} . 
                     """
                 
+                    // Audit Docker image
                     sh """
-                        // download CLI
                         curl -fL https://getcli.jfrog.io/v2-jf | sh
                         ./jf --version
-
-                        // audit on docker images
-                        ./jf docker scan ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION}\
+                        ./jf docker scan ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION} \
                             --url=https://${params.JPD_URL} \
                             --user=${ARTY_CREDS_USR}  \
                             --password="${ARTY_CREDS_PSW}"
