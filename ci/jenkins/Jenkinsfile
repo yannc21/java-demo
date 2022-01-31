@@ -301,7 +301,7 @@ pipeline {
                             --user=${ARTY_CREDS_USR}  \
                             --password="${ARTY_CREDS_PSW}" \
                         yann-rt
-                        ./jf docker scan ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION}
+                        JFROG_CLI_LEVEL=DEBUG ./jf docker scan ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION}
                     """
 
                     rtDockerPush(
