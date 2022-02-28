@@ -8,6 +8,7 @@ resources:
         include: {{ gitBranch }}
       files:
         include: src|ci/.*
+        exclude: ci/jfrog/.*
       buildOn:
         commit: true
         pullRequestCreate: true

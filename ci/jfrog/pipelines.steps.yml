@@ -98,10 +98,10 @@ pipelines:
       - name: build_backapp_mvn_docker
         type: DockerBuild
         configuration:
-          # environmentVariables:
+          environmentVariables:
           #   JFROG_CLI_BUILD_NAME: "{{ gitBranch }}_backapp_mvn_docker"
           #   JFROG_CLI_BUILD_URL: "${step_url}${res_src_code_backapp_mvn_branchName}"
-          #   JFROG_CLI_LOG_LEVEL: INFO
+            JFROG_CLI_LOG_LEVEL: DEBUG
           affinityGroup: together
           dockerFileName: Dockerfile
           dockerFileLocation: src
