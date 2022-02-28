@@ -9,6 +9,7 @@ resources:
       files:
         include: src|ci/.*
       buildOn:
+        commit: true
         pullRequestCreate: true
         pullRequestClose: true
 
