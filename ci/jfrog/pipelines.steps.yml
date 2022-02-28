@@ -107,6 +107,7 @@ pipelines:
           dockerFileLocation: src
           dockerImageName: ${dockerRepo}/backapp-mvn-docker
           dockerImageTag: ${runVarAppVersion}
+          dockerOptions: --build-arg REGISTRY=${dockerRepo}
           inputSteps:
             - name: export_variables
           inputResources:
