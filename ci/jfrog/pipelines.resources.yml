@@ -9,6 +9,7 @@ resources:
       files:
         include: src/.*
       buildOn:
+        commit: true
         pullRequestCreate: true
         pullRequestClose: true
 
@@ -41,7 +42,6 @@ resources:
       files:
         include: src/Dockerfile
       buildOn:
-        commit: true
         pullRequestCreate: true
         pullRequestClose: true
 
