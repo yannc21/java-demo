@@ -7,9 +7,8 @@ resources:
       branches:
         include: {{ gitBranch }}
       files:
-        include: src/.*
+        include: src|ci/.*
       buildOn:
-        commit: true
         pullRequestCreate: true
         pullRequestClose: true
 
