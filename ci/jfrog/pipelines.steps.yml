@@ -94,6 +94,7 @@ pipelines:
         execution:
           onExecute:
             - add_run_variables runVarAppVersion=${res_pb_backapp_mvn_appVersion}
+            - echo $runVarAppVersion
 
       - name: build_backapp_mvn_docker
         type: DockerBuild
@@ -119,6 +120,7 @@ pipelines:
           onStart:
             # - pwd && ls -l
             # - ls -l ../../ 
+            - echo $runVarAppVersion
             - ls -la ${res_fs_backapp_mvn_resourcePath}
             - echo ${res_src_dockerfile_backapp_mvn_resourcePath}
             - ls -la  ${res_src_dockerfile_backapp_mvn_resourcePath}
