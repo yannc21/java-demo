@@ -1,4 +1,4 @@
-ARG REGISTRY=yann-swampup.dev.gcp.devopsacc.team
+ARG REGISTRY=yann-sbx.dev.gcp.devopsacc.team
 ARG DOCKER_REPO=urs-docker
 
 FROM $REGISTRY/$DOCKER_REPO/groovy:jre16
