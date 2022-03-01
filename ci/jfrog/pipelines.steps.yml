@@ -81,6 +81,7 @@ pipelines:
       environmentVariables:
         readOnly:
           registryFQDN: yann-sbx.dev.gcp.devopsacc.team
+          dockerRepoName: urs-docker
           skipScan: "true"
           pushRepo: urs-docker-dev-local
           promoteRepo: urs-docker-rc-local
@@ -106,9 +107,9 @@ pipelines:
           affinityGroup: together
           dockerFileName: Dockerfile
           dockerFileLocation: src
-          dockerImageName: ${registryFQDN}/backapp-mvn-docker
+          dockerImageName: ${registryFQDN}/${dockerRepoName}/backapp-mvn-docker
           dockerImageTag: ${runVarAppVersion}
-          dockerOptions: --build-arg REGISTRY=${registryFQDN}
+          dockerOptions: --build-arg REGISTRY=${registryFQDN} --build-arg DOCKER_REPO=${dockerRepoName}
           inputSteps:
             - name: export_variables
           inputResources:
