@@ -1,10 +1,10 @@
-ARG REGISTRY=yann-swampup.dev.aws.devopsacc.team
+ARG REGISTRY=yann-swampup.dev.gcp.devopsacc.team
 ARG DOCKER_REPO=urs-docker
 
 FROM $REGISTRY/$DOCKER_REPO/groovy:jre16
 
 # https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact
-ARG REGISTRY
+# ARG REGISTRY
 
 # dummy 
 RUN mkdir -p /home/groovy/webapp/
