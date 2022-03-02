@@ -164,17 +164,17 @@ pipelines:
           onStart:
             - if [ "${skipScan}" == "true" ]; then echo Skipping scan_backapp_mvn_docker step; exit 0; fi
             
-      - name: promote_bi_backapp_mvn_docker
-        type: PromoteBuild
-        configuration:
-          targetRepository: ${promoteRepo}
-          includeDependencies: false
-          status: SCAN_OK
-          comment: Xray scan OK
-          copy: false
-          inputSteps:
-            - name: scan_backapp_mvn_docker
-          inputResources:
-            - name: bi_backapp_mvn_docker
-          outputResources:
-            - name: bi_backapp_mvn_docker_promoted
+      # - name: promote_bi_backapp_mvn_docker
+      #   type: PromoteBuild
+      #   configuration:
+      #     targetRepository: ${promoteRepo}
+      #     includeDependencies: false
+      #     status: SCAN_OK
+      #     comment: Xray scan OK
+      #     copy: false
+      #     inputSteps:
+      #       - name: scan_backapp_mvn_docker
+      #     inputResources:
+      #       - name: bi_backapp_mvn_docker
+      #     outputResources:
+      #       - name: bi_backapp_mvn_docker_promoted
