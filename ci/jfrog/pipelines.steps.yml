@@ -80,7 +80,7 @@ pipelines:
     configuration:
       environmentVariables:
         readOnly:
-          registryFQDN: yann-sbx.dev.gcp.devopsacc.team
+          registryFQDN: platform-eu.stg.gcp.devopsacc.team
           dockerRepoName: urs-docker
           skipScan: "true"
           pushRepo: urs-docker-dev-local
