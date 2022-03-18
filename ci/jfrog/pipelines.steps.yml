@@ -35,7 +35,7 @@ pipelines:
           outputResources:
             - name: bi_backapp_mvn
           integrations:
-            - name: artifactory_eu
+            - name: artifactory_eu_https
             - name: artifactory_docker
         execution:
           onStart:
@@ -125,7 +125,7 @@ pipelines:
             - name: src_dockerfile_backapp_mvn
             - name: fs_backapp_mvn
           integrations:
-            - name: artifactory_eu
+            - name: artifactory_eu_https
             - name: artifactory_docker
         execution:
           onStart:
@@ -152,7 +152,7 @@ pipelines:
           inputSteps:
             - name: build_backapp_mvn_docker
           integrations:
-            - name: artifactory_eu
+            - name: artifactory_eu_https
           outputResources:
             - name: bi_backapp_mvn_docker
         execution:
