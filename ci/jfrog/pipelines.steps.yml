@@ -9,10 +9,18 @@ pipelines:
       - name: build_backapp_mvn
         type: MvnBuild
         configuration:
+          runtime:      
+            type: image
+            image:
+              custom:
+                name: platform-eu.stg.gcp.devopsacc.team/urs-docker/pipelines-u18java
+                tag: 11
+                registry: artifactory_docker
+                sourceRepository: urs-docker
           environmentVariables:
             JFROG_CLI_BUILD_NAME: "{{ gitBranch }}_backapp_mvn"
             JFROG_CLI_BUILD_URL: "${step_url}${res_src_code_backapp_mvn_branchName}"
-            JFROG_CLI_LOG_LEVEL: DEBUG
+            JFROG_CLI_LOG_LEVEL: INFO
             M2_HOME: /usr/local/apache-maven-3.6.3/
           mvnCommand: clean package --no-transfer-progress
           sourceLocation: src
@@ -28,6 +36,7 @@ pipelines:
             - name: bi_backapp_mvn
           integrations:
             - name: artifactory_eu
+            - name: artifactory_docker
         execution:
           onStart:
             - ls -l ${res_src_code_backapp_mvn_resourcePath}/src
