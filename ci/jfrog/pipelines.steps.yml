@@ -126,7 +126,7 @@ pipelines:
             - name: fs_backapp_mvn
           integrations:
             - name: artifactory_eu
-            - name: aretifactory_docker
+            - name: artifactory_docker
         execution:
           onStart:
             # - pwd && ls -l
