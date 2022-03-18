@@ -17,14 +17,14 @@ resources:
   - name: bi_backapp_mvn
     type: BuildInfo
     configuration:
-      sourceArtifactory: artifactory_eu
+      sourceArtifactory: artifactory_eu_https
       buildName: {{ gitBranch }}_backapp_mvn
       buildNumber: ${run_number}
     
   - name: bi_backapp_mvn_promoted
     type: BuildInfo
     configuration:
-      sourceArtifactory: artifactory_eu
+      sourceArtifactory: artifactory_eu_https
       buildName: {{ gitBranch }}_backapp_mvn
       buildNumber: ${run_number}
 
