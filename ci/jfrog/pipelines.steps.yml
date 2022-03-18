@@ -14,7 +14,7 @@ pipelines:
             image:
               custom:
                 name: platform-eu.stg.gcp.devopsacc.team/urs-docker/jfrog/pipelines-u18java
-                tag: "11"
+                tag: "14"
                 registry: artifactory_docker
                 sourceRepository: urs-docker
           environmentVariables:
