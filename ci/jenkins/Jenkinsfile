@@ -288,7 +288,7 @@ pipeline {
                     )
                     
                     sh """#!/bin/sh
-                        apk add curl openjdk11
+                        apk add curl openjdk11 libc6-compat
                         echo ${env.DOCKER_REGISTRY_URL}
                         git_path=`echo ${params.MY_GIT_URL} | cut -d/ -f4,5`
                         echo \${git_path}
