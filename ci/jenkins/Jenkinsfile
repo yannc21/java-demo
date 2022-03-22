@@ -33,7 +33,6 @@ pipeline {
     environment {
         // for docker build
         ARTY_CREDS=credentials('jenkins_rt')
-        ARTY_ADMIN_CREDS=credentials('admin_rt')
         
         // for RT plugin : should match the ID just above
         ARTY_CREDS_ID='jenkins_rt'
@@ -306,8 +305,8 @@ pipeline {
                         ./jf c show
                         JFROG_CLI_LEVEL=ERROR CI=true ./jf c add  \
                             --url=https://${params.JPD_URL} \
-                            --user=${ARTY_ADMIN_CREDS_USR}  \
-                            --password="${ARTY_ADMIN_CREDS_PSW}" \
+                            --user=${ARTY_CREDS_USR}  \
+                            --password="${ARTY_CREDS_PSW}" \
                         yann-rt
                         JFROG_CLI_LEVEL=DEBUG ./jf docker scan ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION}
                     """
