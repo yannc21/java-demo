@@ -118,15 +118,15 @@ pipeline {
                             id: "MAVEN_DEPLOYER",
                             serverId: env.ART_ID,
                             properties: ["app.name=${params.APP_NAME}","app.version=${params.NEW_VERSION}"],
-                            releaseRepo: env.MVN_REPO,
-                            snapshotRepo: env.MVN_REPO
+                            releaseRepo: params.MVN_REPO,
+                            snapshotRepo: params.MVN_REPO
                         )
         
                         rtMavenResolver (
                             id: "MAVEN_RESOLVER",
                             serverId: env.ART_ID,
-                            releaseRepo: env.MVN_REPO,
-                            snapshotRepo: env.MVN_REPO
+                            releaseRepo: params.MVN_REPO,
+                            snapshotRepo: params.MVN_REPO
                         )
                         
                         rtBuildInfo (
@@ -135,7 +135,7 @@ pipeline {
          
                             buildName: env.MY_BUILD_NAME,
                             buildNumber: env.BUILD_NUMBER,
-    			            maxBuilds: 1,
+    			    maxBuilds: 1,
                             // doNotDiscardBuilds: ['4'],
             			    // deleteBuildArtifacts: true
                         )
@@ -149,13 +149,16 @@ pipeline {
                                 --user=${ARTY_CREDS_USR}  \
                                 --password="${ARTY_CREDS_PSW}" \
                             yann-rt
+                            ./jf mvn-config \
+				--server-id-resolve=yann-rt \
+				--repo-resolve-releases=${params.MVN_REPO} \
+				--repo-resolve-snapshots=${params.MVN_REPO}
                             ./jf audit-mvn
-
                         """
 
                         rtMavenRun (
                             pom: "pom.xml",
-                            goals: 'clean install -Dartifactory.publish.artifacts=true -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn',
+                            goals: 'clean package -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn',
                             deployerId: "MAVEN_DEPLOYER",
                             resolverId: "MAVEN_RESOLVER",
                             buildName: env.MY_BUILD_NAME,
