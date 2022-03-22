@@ -42,8 +42,8 @@ pipeline {
         DOCKER_BUILD_NAME='jenkins-java-docker'
         DOCKER_REGISTRY_URL=sh(returnStdout: true, script: """ if [ \"${params.DOCKER_SUB_DOMAIN}\" = \"true\" ]; then echo \"${params.DOCKER_REPO}.${params.JPD_URL}\"; else echo \"${params.JPD_URL}/${params.DOCKER_REPO}\"; fi""").trim()
         
-        JAVA_HOME = '/usr/lib/jvm/java-1.8-openjdk/'
-        MAVEN_HOME = '/usr/share/maven'
+        //JAVA_HOME = '/usr/lib/jvm/java-1.8-openjdk/'
+        //MAVEN_HOME = '/usr/share/maven'
     }
 
     parameters {
