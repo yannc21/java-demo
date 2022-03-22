@@ -92,7 +92,11 @@ pipeline {
             steps {
                 container('maven') {
                     
-                    git branch: params.MY_GIT_BRANCH , url: params.MY_GIT_URL
+                    //git branch: params.MY_GIT_BRANCH , url: params.MY_GIT_URL
+                    sh """#!/bin/sh
+                        apk add git curl openjdk11 jq
+                        git clone ${params.MY_GIT_URL} -b ${params.MY_GIT_BRANCH}
+                    """
 
                     dir ("src") {
 
