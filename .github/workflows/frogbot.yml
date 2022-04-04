@@ -23,7 +23,7 @@ jobs:
         env:
           # [Mandatory] 
           # JFrog platform URL
-          # JF_URL: ${{ secrets.JF_URL }}
+          JF_URL: ${{ secrets.JF_URL }}
 
           # [Mandatory if JF_ACCESS_TOKEN is not provided] 
           # JFrog username with 'read' permissions for Xray. Must be provided with JF_PASSWORD 
@@ -31,7 +31,7 @@ jobs:
 
           # [Mandatory if JF_ACCESS_TOKEN is not provided] 
           # JFrog password. Must be provided with JF_USER 
-          JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
+          # JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
 
           # [Manadatory] 
           # The GitHub token automatically generated for the job
