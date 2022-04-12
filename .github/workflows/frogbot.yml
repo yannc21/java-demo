@@ -4,6 +4,8 @@ on:
   # After "🐸 frogbot scan" label was added to a pull request, Frogbot scans the pull request.
   pull_request_target:
     types: [labeled, opened]
+env:
+  MVN_REPO: urs-mvn
 jobs:
   scan-pull-request:
     runs-on: ubuntu-latest
@@ -18,6 +20,16 @@ jobs:
         with:
           java-version: "11"
           distribution: "temurin"
+
+      - uses: jfrog/setup-jfrog-cli@v2
+        env:
+          JF_ENV_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
+
+      - name: Configure JFrog CLI with Maven client
+        run: | 
+          jf mvnc --global \
+                  --repo-resolve-releases=${{ env.MVN_REPO }}	\
+                  --repo-resolve-snapshots=${{ env.MVN_REPO }}	\
 
       - uses: jfrog/frogbot@v1
         env:
@@ -51,3 +63,4 @@ jobs:
           # JFrog project. Learn more about it here: https://www.jfrog.com/confluence/display/JFROG/Projects
           # JF_PROJECT: <project-key>
           JF_WORKING_DIR: src/library/ 
+          JF_INSTALL_DEPS_CMD: "jf mvn package"
