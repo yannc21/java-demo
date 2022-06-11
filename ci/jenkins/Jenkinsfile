@@ -92,7 +92,6 @@ pipeline {
             steps {
                 container('maven') {
                     
-                    //git branch: params.MY_GIT_BRANCH , url: params.MY_GIT_URL
                     sh """#!/bin/sh
                         apk add git curl openjdk11 jq
                         git clone ${params.MY_GIT_URL} -b ${params.MY_GIT_BRANCH}
@@ -146,6 +145,7 @@ pipeline {
 
                         // audit dependencies
                         sh """
+			    export MAVEN_OPTS="-Dorg.slf4j.simpleLogger.log.org.apache.maven.cl‌​i.transfer.Slf4jMave‌​nTransferListener=wa‌rn"
                             curl -fL https://getcli.jfrog.io/v2-jf | sh
                             ./jf --version
                             JFROG_CLI_LEVEL=ERROR CI=true ./jf c add  \
@@ -157,7 +157,7 @@ pipeline {
 				--server-id-resolve=yann-rt \
 				--repo-resolve-releases=${params.MVN_REPO} \
 				--repo-resolve-snapshots=${params.MVN_REPO}
-                            ./jf audit-mvn
+                            ./jf audit --mvn
                         """
 
                         rtMavenRun (
@@ -174,56 +174,11 @@ pipeline {
                             buildName: env.MY_BUILD_NAME,
                             buildNumber: env.BUILD_NUMBER
                         )
-
-                        sh """
-                            echo ${env.MY_BUILD_NAME}
-                            if [ ${params.INDEX_BUILD} == "true" ]; then
-                                curl \
-                                    -XPOST \
-                                    -u "${ADM_USER}:${ADM_PASS}" \
-                                    -H "Content-Type: application/json" \
-                                    -d '{"names":["'${env.MY_BUILD_NAME}'"]}' \
-                                https://${params.JPD_URL}/xray/api/v1/binMgr/builds
-                            else
-                                echo "No indexing"
-                            fi 
-                        """
                     }
                 } // end container
             } // end step
         }   // end stage
         
-        // stage ('Xray scan') {
-        //     when {
-        //         expression {
-        //             params.MVN_BUILD
-        //         }
-        //     }
-        //     steps {
-        //         xrayScan (
-        //             serverId: env.ART_ID,
-        //             buildName: env.MY_BUILD_NAME,
-        //             buildNumber: env.BUILD_NUMBER,
-        //             failBuild: params.FAIL_BUILD 
-        //         )   
-
-        //         sh """
-        //             # workaround to see the scan result in the UI
-        //             if [ ${params.INDEX_BUILD} == "true" ]; then
-        //                 curl \
-        //                     -XPOST \
-        //                     -u "${ADM_USER}:${ADM_PASS}" \
-        //                     -H "Content-Type: application/json" \
-        //                     -d '{"buildName": "'${env.MY_BUILD_NAME}'", "buildNumber": "'${env.BUILD_NUMBER}'" }' \
-        //                 https://${params.JPD_URL}/xray/api/v1/scanBuild
-        //             else
-        //                 echo "No indexing"
-        //             fi
-        //         """
-        //     }
-        // }
-        
-
         stage ('Build promotion') {
             when {
                 expression {
@@ -341,37 +296,6 @@ pipeline {
                 }
             } // end steps
         } // end stage
-
-        // stage ('Xray scan for Docker Build') {
-        //     when {
-        //         expression {
-        //             params.DOCKER_BUILD
-        //         }
-        //     }
-        //     steps {
-        //         xrayScan (
-        //             serverId: env.ART_ID,
-        //             buildName: env.DOCKER_BUILD_NAME,
-        //             buildNumber: env.BUILD_NUMBER,
-        //             failBuild: params.FAIL_BUILD 
-        //         ) 
-
-        //         sh """
-        //             # workaround to see the scan result in the UI
-        //             if [ ${params.INDEX_BUILD} == "true" ]; then
-        //                 curl \
-        //                     -XPOST \
-        //                     -u "${ADM_USER}:${ADM_PASS}" \
-        //                     -H "Content-Type: application/json" \
-        //                     -d '{"buildName": "'${env.DOCKER_BUILD_NAME}'", "buildNumber": "'${env.BUILD_NUMBER}'" }' \
-        //                 https://${params.JPD_URL}/xray/api/v1/scanBuild
-        //             else
-        //                 echo "No indexing"
-        //             fi 
-        //         """     
-        //     }
-        // }
-        
 
         stage ('Build promotion for Docker Build') {
             when {
